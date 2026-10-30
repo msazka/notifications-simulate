@@ -1,0 +1,24 @@
+.app {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.ping {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+}
+
+.ping h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.ping-ok {
+  color: #1a7f37;
+}
+
+.ping-error {
+  color: #cf222e;
+}
