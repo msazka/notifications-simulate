@@ -1,24 +1,135 @@
 .app {
-  max-width: 640px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 2rem 1rem;
 }
 
-.ping {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 1rem 1.25rem;
-}
-
-.ping h2 {
+h2 {
   margin-top: 0;
   font-size: 1.1rem;
 }
 
-.ping-ok {
+button {
+  font: inherit;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  background: #f6f8fa;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+input,
+select {
+  font: inherit;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+}
+
+.create-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem 1rem;
+  align-items: start;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.create-form h2,
+.create-form .form-error {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.create-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.create-form button[type='submit'] {
+  grid-column: 1 / -1;
+  justify-self: start;
+  background: #1f883d;
+  border-color: #1a7f37;
+  color: #fff;
+}
+
+.field-error,
+.form-error,
+.banner-error {
+  color: #cf222e;
+  font-size: 0.85rem;
+}
+
+.banner-error {
+  border: 1px solid #ffcecb;
+  background: #ffebe9;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.list-header h2 {
+  margin: 0;
+}
+
+.notification-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.notification-table th,
+.notification-table td {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.notification-table .actions {
+  display: flex;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.status {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-pending {
+  background: #fff8c5;
+  color: #7d4e00;
+}
+
+.status-delivered {
+  background: #dafbe1;
   color: #1a7f37;
 }
 
-.ping-error {
+.status-bounced {
+  background: #ffebe9;
   color: #cf222e;
+}
+
+.empty {
+  color: #656d76;
 }
