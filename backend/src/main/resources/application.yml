@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: notifications
+  datasource:
+    url: jdbc:postgresql://localhost:5432/notifications
+    username: app
+    password: app
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+server:
+  port: 8080
