@@ -5,6 +5,10 @@ type Props = {
   onCreated: () => void
 }
 
+// Suggestions only; the API accepts any non-blank value.
+const PRODUCER_SUGGESTIONS = ['billing', 'shop', 'auth']
+const USE_CASE_SUGGESTIONS = ['dunning', 'invoice', 'password-reset', 'welcome']
+
 const EMPTY_FORM: CreateNotificationRequest = {
   producerId: '',
   recipientEmail: '',
@@ -52,7 +56,17 @@ function CreateNotificationForm({ onCreated }: Props) {
 
       <label>
         Producer
-        <input value={form.producerId} onChange={(e) => update('producerId', e.target.value)} />
+        <input
+          value={form.producerId}
+          placeholder="billing"
+          list="producer-suggestions"
+          onChange={(e) => update('producerId', e.target.value)}
+        />
+        <datalist id="producer-suggestions">
+          {PRODUCER_SUGGESTIONS.map((p) => (
+            <option key={p} value={p} />
+          ))}
+        </datalist>
         {fieldErrors.producerId && <span className="field-error">{fieldErrors.producerId}</span>}
       </label>
 
@@ -61,6 +75,7 @@ function CreateNotificationForm({ onCreated }: Props) {
         <input
           type="email"
           value={form.recipientEmail}
+          placeholder="max@example.com"
           onChange={(e) => update('recipientEmail', e.target.value)}
         />
         {fieldErrors.recipientEmail && <span className="field-error">{fieldErrors.recipientEmail}</span>}
@@ -68,7 +83,17 @@ function CreateNotificationForm({ onCreated }: Props) {
 
       <label>
         Use case
-        <input value={form.useCase} onChange={(e) => update('useCase', e.target.value)} />
+        <input
+          value={form.useCase}
+          placeholder="dunning"
+          list="use-case-suggestions"
+          onChange={(e) => update('useCase', e.target.value)}
+        />
+        <datalist id="use-case-suggestions">
+          {USE_CASE_SUGGESTIONS.map((u) => (
+            <option key={u} value={u} />
+          ))}
+        </datalist>
         {fieldErrors.useCase && <span className="field-error">{fieldErrors.useCase}</span>}
       </label>
 
