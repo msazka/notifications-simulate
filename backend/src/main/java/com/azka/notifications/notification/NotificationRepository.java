@@ -16,7 +16,7 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
 
 	Page<Notification> findByStatus(NotificationStatus status, Pageable pageable);
 
-	@Modifying(clearAutomatically = true)
+	@Modifying(flushAutomatically = true, clearAutomatically = true)
 	@Query("update Notification n set n.status = :target where n.id = :id and n.status = :expected")
 	int updateStatusIfCurrent(@Param("id") UUID id, @Param("expected") NotificationStatus expected,
 							  @Param("target") NotificationStatus target);

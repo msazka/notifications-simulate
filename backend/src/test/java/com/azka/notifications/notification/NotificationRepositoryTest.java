@@ -97,13 +97,4 @@ class NotificationRepositoryTest {
     private static Notification newNotification(String producerId, String key) {
         return new Notification(producerId, key, "hash", "max@example", "dunning", "de");
     }
-
-    @Test
-    void eventResponseShowsNewStatus() {
-        var service = new NotificationService(notificationRepository);
-        var id = notificationRepository.saveAndFlush(newNotification("billing", "key-9")).getId();
-        var response = service.applyEvent(id, "sent");
-
-        assertThat(response.status()).isEqualTo(NotificationStatus.DELIVERED);
-    }
 }

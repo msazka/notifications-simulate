@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -101,22 +102,31 @@ class NotificationServiceTest {
 
 	@Test
 	void sentOnPendingDelivers() {
-		var notification = stored(REQUEST, NotificationStatus.DELIVERED);
-		var id = notification.getId();
+		// findById returns the row as stored after the conditional UPDATE.
+		var reloaded = stored(REQUEST, NotificationStatus.DELIVERED);
+		var id = reloaded.getId();
+		when(repository.findById(id)).thenReturn(Optional.of(reloaded));
 
-		when(repository.findById(notification.getId())).thenReturn(Optional.of(notification));
-		var response = service.applyEvent(notification.getId(), "sent");
-		verify(repository).updateStatusIfCurrent(id, NotificationStatus.PENDING, NotificationStatus.DELIVERED);
+		var response = service.applyEvent(id, "sent");
+
+		var order = inOrder(repository);
+		order.verify(repository).updateStatusIfCurrent(id, NotificationStatus.PENDING, NotificationStatus.DELIVERED);
+		order.verify(repository).findById(id);
 		assertThat(response.status()).isEqualTo(NotificationStatus.DELIVERED);
 	}
 
 	@Test
 	void bounceOnPendingBounces() {
-		var notification = stored(REQUEST, NotificationStatus.BOUNCED);
-		var id = notification.getId();
-		when(repository.findById(notification.getId())).thenReturn(Optional.of(notification));
-		var response = service.applyEvent(notification.getId(), "bounce");
-		verify(repository).updateStatusIfCurrent(id, NotificationStatus.PENDING, NotificationStatus.BOUNCED);
+		// findById returns the row as stored after the conditional UPDATE.
+		var reloaded = stored(REQUEST, NotificationStatus.BOUNCED);
+		var id = reloaded.getId();
+		when(repository.findById(id)).thenReturn(Optional.of(reloaded));
+
+		var response = service.applyEvent(id, "bounce");
+
+		var order = inOrder(repository);
+		order.verify(repository).updateStatusIfCurrent(id, NotificationStatus.PENDING, NotificationStatus.BOUNCED);
+		order.verify(repository).findById(id);
 		assertThat(response.status()).isEqualTo(NotificationStatus.BOUNCED);
 	}
 
