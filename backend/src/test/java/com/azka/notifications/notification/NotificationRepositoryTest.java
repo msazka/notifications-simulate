@@ -14,7 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+
 @DataJpaTest
 class NotificationRepositoryTest {
 
@@ -22,11 +22,12 @@ class NotificationRepositoryTest {
     private NotificationRepository notificationRepository;
 
     @Test
-    void sameProducerAndKeyIsRejectedByDatabase () {
+    void sameProducerAndKeyIsRejectedByDatabase() {
         notificationRepository.saveAndFlush(newNotification("billing", "key-1"));
         assertThatThrownBy(() -> notificationRepository.saveAndFlush(newNotification("billing", "key-1")))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
+
     @Test
     void sameKeyFromAnotherProducerIsAllowed() {
         notificationRepository.saveAndFlush(newNotification("billing", "key-2"));
@@ -93,8 +94,8 @@ class NotificationRepositoryTest {
         return notification;
     }
 
-    private static  Notification newNotification(String producerId, String key) {
-    return new Notification(producerId,key, "hash", "max@example", "dunning", "de");
+    private static Notification newNotification(String producerId, String key) {
+        return new Notification(producerId, key, "hash", "max@example", "dunning", "de");
     }
 
     @Test
