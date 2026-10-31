@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class NotificationService {
@@ -51,15 +52,14 @@ public class NotificationService {
 		return notifications.stream().map(NotificationResponse::from).toList();
 	}
 
+	@Transactional
 	public NotificationResponse applyEvent(UUID id, String event) {
 		NotificationStatus target = targetStatus(event);
 		var notification = repository.findById(id).orElseThrow(() -> new NotificationNotFoundException(id));
 
-		// DELIVERED and BOUNCED are final; events on them are ignored.
-		if (notification.getStatus() == NotificationStatus.PENDING) {
-			notification.setStatus(target);
-			notification = repository.save(notification);
-		}
+		// One conditional UPDATE: only a PENDING notification changes.
+		// A parallel or late event on a final status updates 0 rows.
+		repository.updateStatusIfCurrent(id, NotificationStatus.PENDING, target);
 		return NotificationResponse.from(notification);
 	}
 

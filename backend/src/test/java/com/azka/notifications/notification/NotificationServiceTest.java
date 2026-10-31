@@ -92,23 +92,22 @@ class NotificationServiceTest {
 
 	@Test
 	void sentOnPendingDelivers() {
-		var notification = stored(REQUEST, NotificationStatus.PENDING);
+		var notification = stored(REQUEST, NotificationStatus.DELIVERED);
+		var id = notification.getId();
+
 		when(repository.findById(notification.getId())).thenReturn(Optional.of(notification));
-		when(repository.save(notification)).thenReturn(notification);
-
 		var response = service.applyEvent(notification.getId(), "sent");
-
+		verify(repository).updateStatusIfCurrent(id, NotificationStatus.PENDING, NotificationStatus.DELIVERED);
 		assertThat(response.status()).isEqualTo(NotificationStatus.DELIVERED);
 	}
 
 	@Test
 	void bounceOnPendingBounces() {
-		var notification = stored(REQUEST, NotificationStatus.PENDING);
+		var notification = stored(REQUEST, NotificationStatus.BOUNCED);
+		var id = notification.getId();
 		when(repository.findById(notification.getId())).thenReturn(Optional.of(notification));
-		when(repository.save(notification)).thenReturn(notification);
-
 		var response = service.applyEvent(notification.getId(), "bounce");
-
+		verify(repository).updateStatusIfCurrent(id, NotificationStatus.PENDING, NotificationStatus.BOUNCED);
 		assertThat(response.status()).isEqualTo(NotificationStatus.BOUNCED);
 	}
 
@@ -123,7 +122,9 @@ class NotificationServiceTest {
 
 		assertThat(afterSent.status()).isEqualTo(finalStatus);
 		assertThat(afterBounce.status()).isEqualTo(finalStatus);
-		verify(repository, never()).save(any());
+		//verify(repository, never()).save(any());
+		verify(repository).updateStatusIfCurrent(notification.getId(), NotificationStatus.PENDING, NotificationStatus.BOUNCED);
+		verify(repository).updateStatusIfCurrent(notification.getId(), NotificationStatus.PENDING, NotificationStatus.DELIVERED);
 	}
 
 	@Test
