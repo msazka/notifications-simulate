@@ -66,11 +66,10 @@ public class NotificationService {
 	@Transactional
 	public NotificationResponse applyEvent(UUID id, String event) {
 		NotificationStatus target = targetStatus(event);
-		var notification = repository.findById(id).orElseThrow(() -> new NotificationNotFoundException(id));
-
+		repository.updateStatusIfCurrent(id, NotificationStatus.PENDING, target);
 		// One conditional UPDATE: only a PENDING notification changes.
 		// A parallel or late event on a final status updates 0 rows.
-		repository.updateStatusIfCurrent(id, NotificationStatus.PENDING, target);
+		var notification = repository.findById(id).orElseThrow(() -> new NotificationNotFoundException(id));
 		return NotificationResponse.from(notification);
 	}
 
