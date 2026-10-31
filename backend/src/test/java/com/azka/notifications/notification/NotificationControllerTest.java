@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -64,6 +66,60 @@ class NotificationControllerTest {
 			.andExpect(jsonPath("$.errors.producerId").exists())
 			.andExpect(jsonPath("$.errors.recipientEmail").value("recipientEmail must be a valid email address"))
 			.andExpect(jsonPath("$.errors.locale").value("locale must be one of de, en, fr, it, nl"));
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { "Billing", "bill ing", "billing ", "-billing", ".billing", "bill/ing", "billé",
+			"bill\\nx" })
+	void createWithNonSlugProducerOrUseCaseReturns400(String value) throws Exception {
+		mockMvc.perform(post("/api/notifications").header("Idempotency-Key", "key-1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(body(value, value)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.errors.producerId").value("producerId " + CreateNotificationRequest.SLUG_RULE))
+			.andExpect(jsonPath("$.errors.useCase").value("useCase " + CreateNotificationRequest.SLUG_RULE));
+	}
+
+	@Test
+	void createWithOver64CharsReturns400() throws Exception {
+		var tooLong = "a".repeat(65);
+
+		mockMvc.perform(post("/api/notifications").header("Idempotency-Key", "key-1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(body(tooLong, tooLong)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.errors.producerId").exists())
+			.andExpect(jsonPath("$.errors.useCase").exists());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { "billing", "password-reset", "order_v2.eu", "9lives" })
+	void createAcceptsSlugProducerAndUseCase(String value) throws Exception {
+		when(service.create(eq("key-1"), any()))
+			.thenReturn(new CreateNotificationResponse(UUID.randomUUID(), NotificationStatus.PENDING));
+
+		mockMvc.perform(post("/api/notifications").header("Idempotency-Key", "key-1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(body(value, value)))
+			.andExpect(status().isAccepted());
+	}
+
+	@Test
+	void createAcceptsExactly64Chars() throws Exception {
+		var max = "a".repeat(64);
+		when(service.create(eq("key-1"), any()))
+			.thenReturn(new CreateNotificationResponse(UUID.randomUUID(), NotificationStatus.PENDING));
+
+		mockMvc.perform(post("/api/notifications").header("Idempotency-Key", "key-1")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(body(max, max)))
+			.andExpect(status().isAccepted());
+	}
+
+	private static String body(String producerId, String useCase) {
+		return """
+				{ "producerId": "%s", "recipientEmail": "max@example.com", "useCase": "%s", "locale": "de" }
+				""".formatted(producerId, useCase);
 	}
 
 	@Test

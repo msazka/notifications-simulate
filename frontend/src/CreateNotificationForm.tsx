@@ -59,6 +59,8 @@ function CreateNotificationForm({ onCreated }: Props) {
         <input
           value={form.producerId}
           placeholder="billing"
+          maxLength={64}
+          autoCapitalize="none"
           list="producer-suggestions"
           onChange={(e) => update('producerId', e.target.value)}
         />
@@ -86,6 +88,8 @@ function CreateNotificationForm({ onCreated }: Props) {
         <input
           value={form.useCase}
           placeholder="dunning"
+          maxLength={64}
+          autoCapitalize="none"
           list="use-case-suggestions"
           onChange={(e) => update('useCase', e.target.value)}
         />

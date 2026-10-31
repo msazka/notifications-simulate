@@ -26,7 +26,7 @@ public class Notification {
 	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID id;
 
-	@Column(name = "producer_id", nullable = false)
+	@Column(name = "producer_id", nullable = false, length = 64)
 	private String producerId;
 
 	@Column(name = "idempotency_key", nullable = false)
@@ -38,7 +38,7 @@ public class Notification {
 	@Column(nullable = false)
 	private String recipientEmail;
 
-	@Column(nullable = false)
+	@Column(nullable = false, length = 64)
 	private String useCase;
 
 	@Column(nullable = false)
