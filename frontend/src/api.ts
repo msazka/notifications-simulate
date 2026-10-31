@@ -54,9 +54,24 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   return body as T
 }
 
-export function listNotifications(status?: NotificationStatus): Promise<Notification[]> {
-  const query = status ? `?status=${status}` : ''
-  return request<Notification[]>(`/api/notifications${query}`)
+export const PAGE_SIZE = 20
+
+export type Page<T> = {
+  items: T[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
+export function listNotifications(
+  status: NotificationStatus | undefined,
+  page: number,
+  size: number = PAGE_SIZE,
+): Promise<Page<Notification>> {
+  const params = new URLSearchParams({ page: String(page), size: String(size) })
+  if (status) params.set('status', status)
+  return request<Page<Notification>>(`/api/notifications?${params}`)
 }
 
 export function createNotification(
