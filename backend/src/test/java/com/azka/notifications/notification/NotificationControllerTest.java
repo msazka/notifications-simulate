@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -72,6 +74,44 @@ class NotificationControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(VALID_BODY))
 			.andExpect(status().isConflict());
+	}
+
+	@Test
+	void listUsesDefaultPageAndSizeAndReturnsPageShape() throws Exception {
+		var item = new NotificationResponse(UUID.randomUUID(), "billing", "max@example.com", "dunning", "de",
+				NotificationStatus.PENDING, Instant.parse("2026-10-31T10:00:00Z"));
+		when(service.list(null, 0, 20)).thenReturn(new PageResponse<>(List.of(item), 0, 20, 41, 3));
+
+		mockMvc.perform(get("/api/notifications"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.items[0].id").value(item.id().toString()))
+			.andExpect(jsonPath("$.page").value(0))
+			.andExpect(jsonPath("$.size").value(20))
+			.andExpect(jsonPath("$.totalElements").value(41))
+			.andExpect(jsonPath("$.totalPages").value(3));
+	}
+
+	@Test
+	void listPassesStatusPageAndSize() throws Exception {
+		when(service.list(NotificationStatus.BOUNCED, 2, 50)).thenReturn(new PageResponse<>(List.of(), 2, 50, 0, 0));
+
+		mockMvc.perform(get("/api/notifications").param("status", "BOUNCED").param("page", "2").param("size", "50"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.page").value(2));
+	}
+
+	@Test
+	void listWithTooLargeSizeReturns400() throws Exception {
+		when(service.list(null, 0, 101)).thenThrow(new InvalidPageRequestException("size must be between 1 and 100"));
+
+		mockMvc.perform(get("/api/notifications").param("size", "101"))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.message").value("size must be between 1 and 100"));
+	}
+
+	@Test
+	void listWithNonNumericPageReturns400() throws Exception {
+		mockMvc.perform(get("/api/notifications").param("page", "abc")).andExpect(status().isBadRequest());
 	}
 
 	@Test

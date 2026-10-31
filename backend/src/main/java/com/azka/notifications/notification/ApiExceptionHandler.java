@@ -44,7 +44,8 @@ public class ApiExceptionHandler {
 		return ErrorResponse.of("Malformed request body");
 	}
 
-	@ExceptionHandler({ MissingIdempotencyKeyException.class, UnknownEventException.class })
+	@ExceptionHandler({ MissingIdempotencyKeyException.class, UnknownEventException.class,
+			InvalidPageRequestException.class })
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ErrorResponse badRequest(RuntimeException ex) {
 		return ErrorResponse.of(ex.getMessage());

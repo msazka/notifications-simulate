@@ -1,6 +1,5 @@
 package com.azka.notifications.notification;
 
-import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
@@ -34,8 +33,9 @@ public class NotificationController {
 	}
 
 	@GetMapping
-	public List<NotificationResponse> list(@RequestParam(required = false) NotificationStatus status) {
-		return service.list(status);
+	public PageResponse<NotificationResponse> list(@RequestParam(required = false) NotificationStatus status,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
+		return service.list(status, page, size);
 	}
 
 	@PostMapping("/{id}/events")

@@ -10,13 +10,16 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 @Entity
 @Table(name = "notification",
 		uniqueConstraints = @UniqueConstraint(name = "uk_notification_producer_key",
-				columnNames = { "producer_id", "idempotency_key" }))
+				columnNames = { "producer_id", "idempotency_key" }),
+		indexes = { @Index(name = "idx_notification_created_at", columnList = "created_at, id"),
+				@Index(name = "idx_notification_status_created_at", columnList = "status, created_at, id") })
 public class Notification {
 
 	@Id

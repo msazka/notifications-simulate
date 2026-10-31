@@ -4,15 +4,18 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class NotificationService {
+
+	static final int MAX_PAGE_SIZE = 100;
 
 	private final NotificationRepository repository;
 
@@ -46,10 +49,18 @@ public class NotificationService {
 		}
 	}
 
-	public List<NotificationResponse> list(NotificationStatus status) {
-		var notifications = status == null ? repository.findAllByOrderByCreatedAtDesc()
-				: repository.findByStatusOrderByCreatedAtDesc(status);
-		return notifications.stream().map(NotificationResponse::from).toList();
+	public PageResponse<NotificationResponse> list(NotificationStatus status, int page, int size) {
+		if (page < 0) {
+			throw new InvalidPageRequestException("page must be 0 or greater");
+		}
+		if (size < 1 || size > MAX_PAGE_SIZE) {
+			throw new InvalidPageRequestException("size must be between 1 and " + MAX_PAGE_SIZE);
+		}
+		// Newest first; id breaks ties so rows with equal timestamps keep a stable order across pages.
+		var pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id")));
+		var notifications = status == null ? repository.findAll(pageable)
+				: repository.findByStatus(status, pageable);
+		return PageResponse.from(notifications, NotificationResponse::from);
 	}
 
 	@Transactional
